@@ -3,216 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>工程管理系統 - Construction Task Manager</title>
+    <title>水喉白圈檢查表 - Water Pipe Inspection</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
         body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; padding: 20px; color: #fff; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        h1 { text-align: center; margin-bottom: 30px; color: #00d4ff; font-size: 2em; }
-        .form-card { background: rgba(255,255,255,0.1); padding: 25px; border-radius: 15px; margin-bottom: 25px; backdrop-filter: blur(10px); }
-        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
-        .form-group { display: flex; flex-direction: column; }
-        label { margin-bottom: 5px; color: #aaa; font-size: 0.9em; }
-        input, select, textarea { padding: 12px; border: none; border-radius: 8px; background: rgba(255,255,255,0.15); color: #fff; font-size: 1em; }
-        input:focus, select:focus, textarea:focus { outline: none; background: rgba(255,255,255,0.25); }
-        textarea { resize: vertical; min-height: 60px; }
-        .btn { padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-size: 1em; transition: all 0.3s; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 20px; color: #00d4ff; font-size: 1.8em; }
+        h2 { color: #ffa502; margin: 25px 0 15px 0; border-bottom: 2px solid #ffa502; padding-bottom: 10px; }
+        .stats { background: rgba(255,165,2,0.2); padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
+        .stats span { font-size: 1.5em; font-weight: bold; color: #ffa502; }
+        .checklist-table { width: 100%; border-collapse: collapse; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
+        .checklist-table th, .checklist-table td { padding: 12px 8px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        .checklist-table th { background: rgba(0,212,255,0.3); color: #fff; font-size: 0.9em; }
+        .checklist-table td { font-size: 0.85em; }
+        .checklist-table td:first-child { background: rgba(255,255,255,0.1); font-weight: bold; }
+        .floor-row { cursor: pointer; transition: background 0.3s; }
+        .floor-row:hover { background: rgba(255,255,255,0.1); }
+        .floor-row.completed { background: rgba(46,213,115,0.2); }
+        .floor-row.partial { background: rgba(255,165,2,0.2); }
+        .checkbox-wrapper { display: flex; justify-content: center; align-items: center; }
+        .custom-checkbox {
+            width: 28px; height: 28px;
+            appearance: none;
+            border: 2px solid #00d4ff;
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+        }
+        .custom-checkbox:checked {
+            background: #2ed573;
+            border-color: #2ed573;
+        }
+        .custom-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 1em; margin: 5px; transition: all 0.3s; }
         .btn-primary { background: linear-gradient(135deg, #00d4ff, #0099cc); color: #fff; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,212,255,0.4); }
         .btn-danger { background: linear-gradient(135deg, #ff4757, #cc0022); color: #fff; }
-        .task-list { display: grid; gap: 15px; }
-        .task-card { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px); border-left: 4px solid #00d4ff; }
-        .task-card.priority-high { border-left-color: #ff4757; }
-        .task-card.priority-medium { border-left-color: #ffa502; }
-        .task-card.priority-low { border-left-color: #2ed573; }
-        .task-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-        .判頭名 { font-size: 1.2em; font-weight: bold; color: #00d4ff; }
-        .優先度 { padding: 4px 12px; border-radius: 20px; font-size: 0.8em; }
-        .優先度.high { background: #ff4757; }
-        .優先度.medium { background: #ffa502; }
-        .優先度.low { background: #2ed573; }
-        .task-content { color: #ddd; margin-bottom: 10px; }
-        .task-dates { display: flex; gap: 20px; font-size: 0.9em; color: #aaa; }
-        .task-result { margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; }
-        .task-actions { margin-top: 15px; display: flex; gap: 10px; }
-        .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .filter-btn { padding: 8px 16px; border-radius: 20px; background: rgba(255,255,255,0.1); color: #fff; cursor: pointer; border: none; }
-        .filter-btn.active { background: #00d4ff; color: #000; }
-        .empty-state { text-align: center; padding: 40px; color: #666; }
-        .完成 { text-decoration: line-through; opacity: 0.6; }
+        .btn-secondary { background: rgba(255,255,255,0.2); color: #fff; }
+        .action-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+        .section-complete { background: rgba(46,213,115,0.3); padding: 15px; border-radius: 10px; margin-top: 20px; text-align: center; }
+        .section-complete h3 { color: #2ed573; }
+        @media (max-width: 768px) {
+            .checklist-table th, .checklist-table td { padding: 8px 4px; font-size: 0.75em; }
+            .custom-checkbox { width: 24px; height: 24px; }
+            h1 { font-size: 1.4em; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🏗️ 工程管理系統</h1>
+        <h1>🚿 水喉白圈檢查表</h1>
         
-        <!-- 新增任務表單 -->
-        <div class="form-card">
-            <h2 style="margin-bottom: 20px; color: #00d4ff;">➕ 新增任務</h2>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>判頭名</label>
-                    <select id="判頭名">
-                        <option value="">選擇判頭...</option>
-                        <option value="PHM">PHM</option>
-                        <option value="創基">創基</option>
-                        <option value="振源">振源</option>
-                        <option value="勝良記">勝良記</option>
-                        <option value="旭暉">旭暉</option>
-                        <option value="聚龍">聚龍</option>
-                        <option value="其他">其他</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>優先度</label>
-                    <select id="優先度">
-                        <option value="high">🔴 高</option>
-                        <option value="medium" selected>🟡 中</option>
-                        <option value="low">🟢 低</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label>需處理內容</label>
-                <textarea id="需處理內容" placeholder="描述需要處理的工程事項..."></textarea>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>發現問題日期</label>
-                    <input type="date" id="發現問題日期">
-                </div>
-                <div class="form-group">
-                    <label>截止日期</label>
-                    <input type="date" id="截止日期">
-                </div>
-            </div>
-            <button class="btn btn-primary" onclick="addTask()">✅ 新增任務</button>
+        <div class="stats">
+            總進度: <span id="totalProgress">0%</span> | 
+            已完成: <span id="completedCount">0</span> / <span id="totalCount">0</span>
         </div>
-
-        <!-- 篩選器 -->
-        <div class="filter-bar">
-            <button class="filter-btn active" onclick="filterTasks('all')">全部</button>
-            <button class="filter-btn" onclick="filterTasks('high')">🔴 高優先度</button>
-            <button class="filter-btn" onclick="filterTasks('medium')">🟡 中優先度</button>
-            <button class="filter-btn" onclick="filterTasks('low')">🟢 低優先度</button>
+        
+        <div class="action-bar">
+            <button class="btn btn-primary" onclick="checkAllInSection('HZ')">HZ 全選</button>
+            <button class="btn btn-primary" onclick="checkAllInSection('LZ')">LZ 全選</button>
+            <button class="btn btn-secondary" onclick="uncheckAll('HZ')">HZ 清空</button>
+            <button class="btn btn-secondary" onclick="uncheckAll('LZ')">LZ 清空</button>
+            <button class="btn btn-danger" onclick="resetAll()">全部重設</button>
         </div>
-
-        <!-- 任務列表 -->
-        <div id="taskList" class="task-list"></div>
+        
+        <h2>HZ - 水喉白圈</h2>
+        <table class="checklist-table" id="HZ-table">
+            <thead>
+                <tr>
+                    <th>樓層</th>
+                    <th>A客廁</th>
+                    <th>A廚房</th>
+                    <th>B主廁</th>
+                    <th>B客廁</th>
+                    <th>B廚房</th>
+                </tr>
+            </thead>
+            <tbody id="HZ-body"></tbody>
+        </table>
+        
+        <h2>LZ - 水喉白圈</h2>
+        <table class="checklist-table" id="LZ-table">
+            <thead>
+                <tr>
+                    <th>樓層</th>
+                    <th>A主廁</th>
+                    <th>A客廁</th>
+                    <th>A廚房</th>
+                    <th>B主廁</th>
+                    <th>B客廁</th>
+                    <th>B廚房</th>
+                    <th>C主廁</th>
+                    <th>C客廁</th>
+                    <th>C廚房</th>
+                </tr>
+            </thead>
+            <tbody id="LZ-body"></tbody>
+        </table>
+        
+        <div class="section-complete" id="all-done" style="display:none;">
+            <h3>🎉 所有檢查已完成！</h3>
+        </div>
     </div>
 
     <script>
-        let tasks = JSON.parse(localStorage.getItem('constructionTasks') || '[]');
-
-        function saveTasks() {
-            localStorage.setItem('constructionTasks', JSON.stringify(tasks));
-            renderTasks();
+        const HZ_FLOORS = ['26', '25', '23', '22', '21', '20', '19', '18', '17', '16', '15', '12', '11', '10', '9'];
+        const HZ_ROOMS = ['A客廁', 'A廚房', 'B主廁', 'B客廁', 'B廚房'];
+        
+        const LZ_FLOORS = ['8', '7', '6', '5', '3', '2'];
+        const LZ_ROOMS = ['A主廁', 'A客廁', 'A廚房', 'B主廁', 'B客廁', 'B廚房', 'C主廁', 'C客廁', 'C廚房'];
+        
+        // Load saved data or create empty
+        let savedData = JSON.parse(localStorage.getItem('waterPipeChecklist') || '{}');
+        
+        function saveData() {
+            localStorage.setItem('waterPipeChecklist', JSON.stringify(savedData));
+            updateStats();
         }
-
-        function addTask() {
-            let foremanName = document.getElementById('判頭名').value;
+        
+        function toggleCheck(section, floor, room) {
+            const key = `${section}-${floor}-${room}`;
+            if (savedData[key]) {
+                delete savedData[key];
+            } else {
+                savedData[key] = true;
+            }
+            saveData();
+            renderTables();
+        }
+        
+        function isChecked(section, floor, room) {
+            return savedData[`${section}-${floor}-${room}`];
+        }
+        
+        function countSection(section, floors, rooms) {
+            let total = 0;
+            let completed = 0;
+            floors.forEach(floor => {
+                rooms.forEach(room => {
+                    total++;
+                    if (isChecked(section, floor, room)) completed++;
+                });
+            });
+            return { total, completed };
+        }
+        
+        function checkAllInSection(section) {
+            const floors = section === 'HZ' ? HZ_FLOORS : LZ_FLOORS;
+            const rooms = section === 'HZ' ? HZ_ROOMS : LZ_ROOMS;
+            floors.forEach(floor => {
+                rooms.forEach(room => {
+                    savedData[`${section}-${floor}-${room}`] = true;
+                });
+            });
+            saveData();
+            renderTables();
+        }
+        
+        function uncheckAll(section) {
+            const floors = section === 'HZ' ? HZ_FLOORS : LZ_FLOORS;
+            const rooms = section === 'HZ' ? HZ_ROOMS : LZ_ROOMS;
+            floors.forEach(floor => {
+                rooms.forEach(room => {
+                    delete savedData[`${section}-${floor}-${room}`];
+                });
+            });
+            saveData();
+            renderTables();
+        }
+        
+        function resetAll() {
+            if (confirm('確定要清空所有選項？')) {
+                savedData = {};
+                saveData();
+                renderTables();
+            }
+        }
+        
+        function renderTables() {
+            renderHZ();
+            renderLZ();
+            updateStats();
+        }
+        
+        function renderHZ() {
+            const tbody = document.getElementById('HZ-body');
+            tbody.innerHTML = HZ_FLOORS.map(floor => {
+                const rooms = HZ_ROOMS.map(room => `
+                    <td class="checkbox-wrapper">
+                        <input type="checkbox" class="custom-checkbox" 
+                            ${isChecked('HZ', floor, room) ? 'checked' : ''}
+                            onchange="toggleCheck('HZ', '${floor}', '${room}')">
+                    </td>
+                `).join('');
+                return `<tr class="floor-row">${rooms}</tr>`;
+            }).join('');
+        }
+        
+        function renderLZ() {
+            const tbody = document.getElementById('LZ-body');
+            tbody.innerHTML = LZ_FLOORS.map(floor => {
+                const rooms = LZ_ROOMS.map(room => `
+                    <td class="checkbox-wrapper">
+                        <input type="checkbox" class="custom-checkbox"
+                            ${isChecked('LZ', floor, room) ? 'checked' : ''}
+                            onchange="toggleCheck('LZ', '${floor}', '${room}')">
+                    </td>
+                `).join('');
+                return `<tr class="floor-row">${rooms}</tr>`;
+            }).join('');
+        }
+        
+        function updateStats() {
+            const hz = countSection('HZ', HZ_FLOORS, HZ_ROOMS);
+            const lz = countSection('LZ', LZ_FLOORS, LZ_ROOMS);
+            const total = hz.total + lz.total;
+            const completed = hz.completed + lz.completed;
+            const percent = total > 0 ? Math.round(completed / total * 100) : 0;
             
-            // 如果揀咗「其他」，彈窗問自選名
-            if (foremanName === '其他') {
-                foremanName = prompt('輸入判頭名稱：', '');
-                if (!foremanName) return; // 如果冇輸入就唔submit
-            }
+            document.getElementById('totalProgress').textContent = percent + '%';
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('totalCount').textContent = total;
             
-            const task = {
-                id: Date.now(),
-                判頭名: foremanName,
-                優先度: document.getElementById('優先度').value,
-                需處理內容: document.getElementById('需處理內容').value,
-                發現問題日期: document.getElementById('發現問題日期').value,
-                截止日期: document.getElementById('截止日期').value,
-                處理結果: '',
-                完成: false,
-                建立時間: new Date().toISOString()
-            };
-
-            if (!task.判頭名 || !task.需處理內容) {
-                alert('請選擇/輸入判頭名同填寫需處理內容！');
-                return;
-            }
-
-            tasks.unshift(task);
-            saveTasks();
-            clearForm();
+            document.getElementById('all-done').style.display = percent === 100 ? 'block' : 'none';
         }
-
-        function clearForm() {
-            document.getElementById('判頭名').value = '';
-            document.getElementById('需處理內容').value = '';
-            document.getElementById('發現問題日期').value = '';
-            document.getElementById('截止日期').value = '';
-            document.getElementById('優先度').value = 'medium';
-        }
-
-        function deleteTask(id) {
-            if (confirm('確定刪除呢個任務？')) {
-                tasks = tasks.filter(t => t.id !== id);
-                saveTasks();
-            }
-        }
-
-        function toggleComplete(id) {
-            const task = tasks.find(t => t.id === id);
-            if (task) {
-                task.完成 = !task.完成;
-                saveTasks();
-            }
-        }
-
-        function updateResult(id) {
-            const task = tasks.find(t => t.id === id);
-            if (task) {
-                task.處理結果 = prompt('輸入處理結果：', task.處理結果);
-                saveTasks();
-            }
-        }
-
-        function filterTasks(priority) {
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            renderTasks(priority);
-        }
-
-        function renderTasks(filter = 'all') {
-            const container = document.getElementById('taskList');
-            
-            let filteredTasks = tasks;
-            if (filter !== 'all') {
-                filteredTasks = tasks.filter(t => t.優先度 === filter);
-            }
-
-            if (filteredTasks.length === 0) {
-                container.innerHTML = '<div class="empty-state">暫時冇任務</div>';
-                return;
-            }
-
-            container.innerHTML = filteredTasks.map(task => `
-                <div class="task-card priority-${task.優先度} ${task.完成 ? '完成' : ''}">
-                    <div class="task-header">
-                        <span class="判頭名">👷 ${task.判頭名}</span>
-                        <span class="優先度 ${task.優先度}">${task.優先度 === 'high' ? '🔴 高' : task.優先度 === 'medium' ? '🟡 中' : '🟢 低'}</span>
-                    </div>
-                    <div class="task-content">${task.需處理內容}</div>
-                    <div class="task-dates">
-                        <span>📅 發現: ${task.發現問題日期 || '未填'}</span>
-                        <span>⏰ 截止: ${task.截止日期 || '未填'}</span>
-                    </div>
-                    ${task.處理結果 ? `<div class="task-result">✅ 處理結果: ${task.處理結果}</div>` : ''}
-                    <div class="task-actions">
-                        <button class="btn btn-primary" onclick="toggleComplete(${task.id})">${task.完成 ? '↩️ 未完成' : '✅ 完成'}</button>
-                        <button class="btn" onclick="updateResult(${task.id})">📝 結果</button>
-                        <button class="btn btn-danger" onclick="deleteTask(${task.id})">🗑️ 刪除</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // 初始化
-        renderTasks();
+        
+        // Initialize
+        renderTables();
     </script>
 </body>
 </html>
