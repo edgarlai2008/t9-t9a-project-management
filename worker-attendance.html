@@ -117,7 +117,7 @@
             <!-- A部分: 位置選擇 (可展開收合) -->
             <div style="margin-top: 15px;">
                 <div class="section-title" onclick="toggleLocationSection()">
-                    <span>📍</span> 選擇位置 (點擊展開)
+                    <span></span> 選擇位置 (點擊展開)
                     <span id="currentLocation" class="location-display"></span>
                     <span id="locationToggleIcon">▼</span>
                 </div>
@@ -402,12 +402,12 @@ function renderRecords() {
                         </span>
                     </div>
                     <div style="font-size: 0.85em; color: #aaa; margin-bottom: 8px;">
-                        📍 ${uniqueLocations} 個位置
+                        ${uniqueLocations} 個位置
                     </div>
                     <div class="內容" style="font-size: 0.9em; margin-top: 8px;">
                         ${items.map(r => `
                             <div style="padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                📍 ${r.location} - ${r.content} 
+                                ${r.location} - ${r.content} 
                                 <span style="color: #00d4ff;">(${r.count}人)</span>
                             </div>
                         `).join('')}
